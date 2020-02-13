@@ -1,0 +1,161 @@
+---
+title: "EDA"
+author: "Sybil"
+date: "2/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# setwd("C:/Users/andrieuxs/Desktop/2020 Hack")
+odcsv <-read.csv("data-cleaned/OD_cleaned.csv")
+dim(odcsv)
+names(odcsv)
+summary(odcsv)
+```
+
+```{r}
+dput(names(odcsv))
+```
+
+```{r}
+library(tidyverse)
+library(gridExtra)
+library(tidyverse)
+library(corrplot)
+library(vcd)
+library(hexbin)
+library(RColorBrewer)
+library(colorspace)
+library(car)
+```
+
+```{r}
+ggplot(data = odcsv, aes(x = Response.Time.Desc, y = , fill = Survive)) +
+  geom_bar(aes(fill = as.factor(Survive), width=0.9))
+  labs(title = "Response Time v.s. Survival",
+        x = "",
+        y = "") +
+    theme_bw() +
+    theme(text=element_text(size = 5))
+```
+
+```{r}
+ggplot(data = odcsv, aes(x = factor(Survive), y = ,
+                            fill = factor(Response.Time.Desc))) +
+  facet_wrap(~Race, scales = "free") +
+  geom_bar(position=position_dodge(0.7), color="black", width=0.5)
+```
+
+
+```{r}
+ggplot(data = odcsv, aes(x = Day)) +
+    geom_bar(aes(fill = factor(Race)))
+```
+
+
+```{r}
+ggplot(data = odcsv, aes(x = factor(Day), y = ,
+                            fill = factor(Race))) +
+  facet_wrap(~Survive, scales = "free") +
+  geom_bar(position=position_dodge(5), color="black", width=0.5)
+```
+
+```{r}
+ggplot(data = odcsv, aes(x = factor(Naloxone.Administered),
+                            fill = factor(Age.Range))) +
+  facet_wrap(~Survive, scales = "free") +
+  geom_bar(position=position_dodge(0.7), color="black", width=0.5)
+```
+
+```{r}
+ggplot(data = odcsv, aes(x = factor(HEROIN ),
+                            fill = factor(Age.Range))) +
+  geom_bar(position=position_dodge(0.7), color="black", width=0.5)
+```
+
+```{r}
+library(lubridate)
+time <- hms(odcsv$Incident.Time)
+time
+odcsv$time <- hms(odcsv$Incident.Time)
+```
+
+```{r}
+period_to_seconds(odcsv$time)/60
+odcsv$minutes <- period_to_seconds(odcsv$time)/60
+```
+
+```{r}
+ggplot(data = odcsv, aes(x = minutes)) +
+  geom_density()
+```
+
+```{r}
+ggplot(data = odcsv, aes(x = minutes)) +
+  geom_histogram(binwidth = 60, fill="white", colour="black") +
+  facet_wrap( ~ Survive)
+```
+
+
+```{r}
+period_to_seconds(odcsv$time)/60/60
+odcsv$hours <- period_to_seconds(odcsv$time)/60/60
+```
+
+```{r}
+ggplot(data = odcsv, aes(x = hours)) +
+  geom_histogram(binwidth = 1, fill="white", colour="black") +
+  facet_wrap( ~ Survive) # change to proportion to be on the same scale 
+```
+
+```{r}
+#library(scales)y = (..prop..)
+ggplot(data = odcsv, aes(x = hours)) +
+  geom_histogram(binwidth = 1, fill="white", colour="black") +
+  facet_wrap( ~ Survive, scales = "free")
+```
+
+
+```{r}
+ggplot(data = odcsv, aes(x = hours, color = Gender.Desc)) +
+  geom_histogram(binwidth = 1, fill="white", colour="black") +
+  facet_wrap(Gender.Desc ~ Survive, scales = "free")
+```
+
+```{r}
+tally <- odcsv %>% group_by(hours) %>% summarise(total_n=n()) 
+
+proportion <- odcsv %>% group_by(hours,Survive) %>% summarise(n=n()) %>% inner_join(tally) %>% mutate(prop=n/total_n)
+
+proportion
+```
+
+```{r}
+ggplot(data = proportion, aes(x = prop)) +
+  geom_histogram(binwidth = 1, fill="blue", colour="red", position = "dodge") +
+  facet_wrap(~ Survive)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
